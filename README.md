@@ -1,86 +1,217 @@
 # AquaGuard
 
-AquaGuard is a smart water leakage reporting and management system designed for civic water utilities, municipal workers, and concerned citizens. The project focuses on real-world water-issue reporting, complaint tracking, worker assignment, analytics, and offline-first synchronization.
+AquaGuard is a smart water leakage reporting and management system that helps citizens report water-related issues, allows municipal staff to review and assign jobs, and gives administrators visibility into system performance and field operations.
+
+This project was built as a local academic prototype for managing complaints such as broken pipelines, water leaks, overflow, and urgent civic infrastructure problems. It combines a Flutter web/mobile front end, an Express.js backend API, and a MySQL database for live operational data.
 
 ## Project status
 
-Phases 1 through 14 are documented. The backend is verified with MySQL, linting, and Jest API tests. The Flutter web application has been run and checked in a browser.
+The application has been verified locally with:
 
-## Project overview
+- MySQL database running on port 3306
+- Backend API running on port 3001
+- Flutter web UI running on port 8080
+- Demo accounts for citizen, admin, and worker roles
+- Backend tests passing and frontend analysis/tests passing in the local environment
 
-- Mobile app: Flutter + Dart
+## What the system does
+
+### Citizen flow
+- Report water leaks or civic issues with location details
+- View complaint history and current status
+- Receive notifications about updates to reported issues
+- Track whether a complaint is pending, assigned, in progress, or resolved
+
+### Field worker flow
+- View assigned tasks from the admin team
+- Update complaint progress and work status
+- Mark issues as resolved or escalated when necessary
+
+### Administrator flow
+- Review all complaints across the system
+- Assign workers to reported issues
+- Monitor analytics and complaint trends
+- Manage the complaint lifecycle from submission to closure
+
+## Tech stack
+
+- Frontend: Flutter + Dart
 - Backend: Node.js + Express.js
-- Database: MySQL
-- Architecture: Layered, role-based, repository-driven system
-- Features: browser geolocation, citizen complaint tracking, admin workflow, field-worker tracking, notifications, analytics, offline sync
-
-## Core roles
-
-1. Citizen
-2. Field Worker
-3. Administrator
+- Database: MySQL 8
+- API security: JWT-based authentication and role-based access control
+- Local dev tooling: Docker Compose for MySQL, npm for backend scripts, Flutter web server for UI
 
 ## Repository structure
 
-- `aquaguard/mobile/` for the Flutter app
-- `aquaguard/backend/` for the Express API
-- `aquaguard/database/` for schema and seed scripts
-- `aquaguard/docs/` for architecture, API, testing, and phase documentation
+- `backend/` — Express API, auth logic, complaint management, admin and worker endpoints
+- `mobile/` — Flutter application for citizen, admin, and worker screens
+- `database/` — database schema and SQL setup files
+- `docs/` — architecture, requirement, API, and phase documentation
+- `docker-compose.yml` — MySQL container configuration
+- `.env.example` — environment template for backend settings
 
-## Backend verification
+## Prerequisites
+
+Before running the project, install:
+
+- Node.js 18+ or newer
+- npm
+- Flutter SDK
+- Docker Desktop / Docker Engine
+- A browser such as Chrome for the Flutter web app
+
+## Local setup
+
+### 1) Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd aquaguard
+```
+
+### 2) Create backend environment file
+
+Copy the example environment settings:
+
+```bash
+cd backend
+copy .env.example .env
+```
+
+If you are using PowerShell instead of CMD, use:
 
 ```powershell
-cd "aquaguard/backend"
+Copy-Item .env.example .env
+```
+
+Make sure the values match your local database setup. The default local demo config is:
+
+```env
+PORT=3001
+NODE_ENV=development
+JWT_SECRET=your_local_secret_here
+JWT_EXPIRES_IN=7d
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=rootpassword
+DB_NAME=aquaguard
+```
+
+### 3) Start MySQL with Docker
+
+```powershell
+cd ..
+docker compose up -d mysql
+```
+
+### 4) Import the database schema
+
+```powershell
+Get-Content .\database\schema.sql | docker exec -i aquaguard_mysql mysql -uroot -prootpassword
+```
+
+This creates the `aquaguard` database and the tables required by the app.
+
+### 5) Install backend dependencies and seed demo data
+
+Open a terminal in the backend folder:
+
+```powershell
+cd backend
+npm install
+npm run seed:demo
+```
+
+The demo seeder creates default users and sample complaints for testing.
+
+### 6) Start the backend API
+
+```powershell
+$env:PORT = '3001'
+npm start
+```
+
+The backend should be available at:
+
+- API health: `http://localhost:3001/api/health`
+
+### 7) Start the Flutter web app
+
+Open a second terminal and run:
+
+```powershell
+cd mobile
+flutter pub get
+flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080
+```
+
+Open the app in a browser:
+
+- Frontend: `http://localhost:8080`
+
+## Demo accounts
+
+Use the following accounts for local testing:
+
+- Citizen: `citizen@aquaguard.demo`
+- Admin: `admin@aquaguard.demo`
+- Worker: `worker@aquaguard.demo`
+
+Password for all demo accounts:
+
+```text
+AquaGuard123!
+```
+
+## Verification commands
+
+These are the commands used to validate the project locally:
+
+```powershell
+cd backend
 npm install
 npm run lint
 npm test -- --runInBand
 npm run test:coverage
 ```
 
-## Mobile verification
-
 ```powershell
-cd "aquaguard/mobile"
+cd mobile
 flutter pub get
 flutter analyze
 flutter test
 flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080
 ```
 
-Open `http://localhost:8080` in Chrome while the Flutter command remains running.
+## Notes for academic/local use
 
-## Database startup
+- The demo app is designed for local development and demonstration.
+- Update the JWT secret in `.env` before using the project beyond a local academic setup.
+- The application uses sample data generated by the seed script for easier testing.
+- The MySQL container is intended for local development rather than production deployment.
 
-```powershell
-cd "aquaguard"
-docker compose up -d mysql
-Get-Content .\database\schema.sql | docker exec -i aquaguard_mysql mysql -uroot -prootpassword
+## GitHub setup (run manually)
+
+This repository is ready to be pushed from your terminal. Run these commands in your own terminal when you are ready to publish it:
+
+```bash
+git init -b main
+git add .
+git commit -m "Add AquaGuard academic project"
+git remote add origin https://github.com/viveka-13/Smart-Water-Leakage-Reporting-and-Management-System.git
+git push -u origin main
 ```
 
-## Academic demo startup
+If the repository already exists locally and you just need to connect to the remote:
 
-After starting MySQL and applying the schema:
-
-```powershell
-cd "aquaguard/backend"
-npm install
-npm run seed:demo
-$env:PORT = '3001'
-npm start
+```bash
+git remote add origin https://github.com/viveka-13/Smart-Water-Leakage-Reporting-and-Management-System.git
+git branch -M main
+git push -u origin main
 ```
 
-In a second terminal:
+## Final note
 
-```powershell
-cd "aquaguard/mobile"
-flutter pub get
-flutter run -d web-server --web-hostname 0.0.0.0 --web-port 8080
-```
+This project is best understood as a working civic technology prototype for water leakage reporting, issue assignment, and field operations management. It is structured for local demonstration and academic evaluation, and it includes realistic role-based workflows for citizens, workers, and administrators.
 
-Open `http://localhost:8080`. Demo password for all roles: `AquaGuard123!`.
-
-- Citizen: `citizen@aquaguard.demo`
-- Admin: `admin@aquaguard.demo`
-- Worker: `worker@aquaguard.demo`
-
-Change the development `JWT_SECRET` before using the backend outside an academic local demo.
